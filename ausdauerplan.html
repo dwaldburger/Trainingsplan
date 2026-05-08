@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Ausdauerplan – Crosstrainer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --surface2: #1c1c1c;
+  --border: #2a2a2a;
+  --accent: #3af5c8;
+  --accent2: #ff5c3a;
+  --text: #f0f0ee;
+  --muted: #666;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 110px; }
+
+/* HEADER */
+.header {
+  padding: 28px 20px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.header-tag { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; }
+.header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 2px; line-height: 1; }
+.header h1 span { color: var(--accent); }
+.header-sub { font-size: 0.8rem; color: var(--muted); margin-top: 6px; font-family: 'DM Mono', monospace; }
+
+/* WEEK STRIP */
+.week-strip { display: flex; gap: 5px; padding: 16px 20px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.week-pill { flex: 1; min-width: 42px; text-align: center; padding: 10px 4px; border-radius: 8px; font-size: 0.7rem; font-family: 'DM Mono', monospace; }
+.week-pill.kraft { background: #6c63ff22; border: 1px solid #6c63ff44; color: #a89fff; }
+.week-pill.cardio { background: #3af5c822; border: 1px solid #3af5c844; color: var(--accent); font-weight: 600; }
+.week-pill.rest { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+.week-pill span { display: block; font-size: 0.6rem; margin-top: 3px; opacity: 0.8; }
+
+/* TABS */
+.tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 99; }
+.tab { flex: 1; padding: 14px 4px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.5px; cursor: pointer; text-transform: uppercase; transition: all 0.2s; }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* CONTENT */
+.content { padding: 20px 16px; }
+.day { display: none; }
+.day.active { display: block; }
+
+/* SECTION TITLE */
+.section-title { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin: 24px 0 10px; display: flex; align-items: center; gap: 10px; }
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* INTRO CARD */
+.intro-card { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 0 12px 12px 0; padding: 16px; margin-bottom: 20px; }
+.intro-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 6px; }
+.intro-card p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+/* PHASE CARDS */
+.phase-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; overflow: hidden; }
+.phase-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px; }
+.phase-name { font-weight: 600; font-size: 0.92rem; }
+.phase-badge { font-family: 'DM Mono', monospace; font-size: 0.68rem; padding: 3px 10px; border-radius: 999px; }
+.badge-low { background: #3af5c811; color: var(--accent); border: 1px solid #3af5c844; }
+.badge-high { background: #ff5c3a22; color: var(--accent2); border: 1px solid #ff5c3a44; }
+.badge-mid { background: #ffcc0022; color: #ffcc00; border: 1px solid #ffcc0044; }
+.phase-detail { font-size: 0.78rem; color: var(--muted); padding: 0 16px 10px; line-height: 1.4; }
+
+/* INTERVAL ROW */
+.interval-row { display: flex; border-top: 1px solid var(--border); }
+.int-col { flex: 1; text-align: center; padding: 10px 8px; border-right: 1px solid var(--border); }
+.int-col:last-child { border-right: none; }
+.int-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+.int-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem; color: var(--accent); line-height: 1; }
+.int-unit { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); margin-top: 2px; }
+
+/* EDITABLE */
+.editable { width: 100%; background: #1e1e1e; border: 1px solid var(--border); border-radius: 6px; color: var(--accent); font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 500; text-align: center; padding: 6px 4px; outline: none; -webkit-appearance: none; }
+.editable:focus { border-color: var(--accent); background: #252525; }
+.editable.muted-field { color: var(--muted); }
+
+/* TIMER */
+.timer-section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 16px; margin-bottom: 12px; text-align: center; }
+.timer-display { font-family: 'Bebas Neue', sans-serif; font-size: 4rem; color: var(--accent); letter-spacing: 4px; line-height: 1; margin: 12px 0; }
+.timer-display.high { color: var(--accent2); }
+.timer-label { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+.timer-phase { font-family: 'DM Mono', monospace; font-size: 0.75rem; margin-top: 6px; }
+.timer-phase.go { color: var(--accent2); font-weight: 600; }
+.timer-phase.rest { color: var(--accent); }
+.timer-btns { display: flex; gap: 10px; margin-top: 16px; }
+.timer-btn { flex: 1; padding: 14px; border-radius: 10px; border: none; font-family: 'DM Mono', monospace; font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; }
+.btn-start { background: var(--accent); color: #000; }
+.btn-reset { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+.btn-start:active, .btn-reset:active { opacity: 0.8; }
+.round-counter { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--muted); margin-top: 10px; }
+.round-counter span { color: var(--accent); font-size: 1rem; font-weight: 600; }
+
+/* SETTINGS */
+.settings-row { display: flex; gap: 8px; margin-bottom: 14px; }
+.setting-item { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 10px; text-align: center; }
+.setting-label { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+
+/* STEADY STATE */
+.steady-timer { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 16px; text-align: center; margin-bottom: 12px; }
+.steady-display { font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; color: var(--accent); letter-spacing: 4px; line-height: 1; margin: 12px 0; }
+.progress-bar { height: 6px; background: var(--border); border-radius: 999px; margin: 14px 0 6px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); border-radius: 999px; width: 0%; transition: width 0.5s; }
+.progress-label { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--muted); }
+
+/* NOTES */
+.notes-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+.notes-card h4 { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.notes-input { width: 100%; background: #1e1e1e; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; padding: 10px; outline: none; resize: none; min-height: 80px; line-height: 1.5; }
+.notes-input:focus { border-color: var(--accent); }
+
+/* PROGRESSION TABLE */
+.prog-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.prog-table th { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+.prog-table td { padding: 10px 10px; border-bottom: 1px solid var(--border); color: var(--muted); }
+.prog-table tr.current td { color: var(--text); background: #3af5c808; }
+.prog-table td:first-child { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--accent); }
+
+/* TIPS */
+.tip-card { display: flex; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; align-items: flex-start; }
+.tip-icon { font-size: 1.1rem; flex-shrink: 0; }
+.tip-text { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+.tip-text strong { color: var(--text); }
+
+/* BOTTOM NAV */
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #0f0f0f; border-top: 1px solid var(--border); display: flex; padding: 12px 16px 24px; gap: 10px; z-index: 200; }
+.nav-btn { flex: 1; padding: 12px 6px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; text-align: center; }
+.nav-btn.active-nav { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--accent); color: #000; font-family: 'DM Mono', monospace; font-size: 0.78rem; padding: 10px 20px; border-radius: 999px; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; z-index: 300; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-tag">// Ausdauer · Crosstrainer · 2× pro Woche</div>
+  <h1>AUSDAUER <span>PLAN</span></h1>
+  <div class="header-sub">Kondition & Ausdauer · Body Transformation</div>
+</div>
+
+<div class="week-strip">
+  <div class="week-pill kraft">Mo<span>Kraft A</span></div>
+  <div class="week-pill cardio">Di<span>Cardio 1</span></div>
+  <div class="week-pill kraft">Mi<span>Kraft B</span></div>
+  <div class="week-pill rest">Do<span>Pause</span></div>
+  <div class="week-pill kraft">Fr<span>Kraft C</span></div>
+  <div class="week-pill cardio">Sa<span>Cardio 2</span></div>
+  <div class="week-pill rest">So<span>Pause</span></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showDay('intervall', this)">Di – Intervall</button>
+  <button class="tab" onclick="showDay('steady', this)">Sa – Steady State</button>
+  <button class="tab" onclick="showDay('progression', this)">Progression</button>
+</div>
+
+<div class="content">
+
+<!-- ===== INTERVALL ===== -->
+<div class="day active" id="day-intervall">
+
+  <div class="intro-card">
+    <h3>⚡ Intervalltraining – 30 Min</h3>
+    <p>Wechsel zwischen hoher und tiefer Intensität. Verbessert die Kondition schnell und verbrennt viele Kalorien – auch noch Stunden nach dem Training.</p>
+  </div>
+
+  <div class="section-title">Timer-Einstellungen</div>
+  <div class="settings-row">
+    <div class="setting-item">
+      <div class="setting-label">Intervall (Sek)</div>
+      <input class="editable" id="int_high" type="number" inputmode="numeric" value="60">
+    </div>
+    <div class="setting-item">
+      <div class="setting-label">Erholung (Sek)</div>
+      <input class="editable" id="int_low" type="number" inputmode="numeric" value="120">
+    </div>
+    <div class="setting-item">
+      <div class="setting-label">Runden</div>
+      <input class="editable" id="int_rounds" type="number" inputmode="numeric" value="6">
+    </div>
+  </div>
+
+  <div class="section-title">Intervall-Timer</div>
+  <div class="timer-section" id="timerSection">
+    <div class="timer-label" id="timerLabel">Bereit zum Start</div>
+    <div class="timer-display" id="timerDisplay">01:00</div>
+    <div class="timer-phase" id="timerPhase">Drücke Start für das Warm-up</div>
+    <div class="round-counter">Runde <span id="currentRound">0</span> / <span id="totalRounds">6</span></div>
+    <div class="timer-btns">
+      <button class="timer-btn btn-start" id="startBtn" onclick="toggleTimer()">▶ Start</button>
+      <button class="timer-btn btn-reset" onclick="resetTimer()">↺ Reset</button>
+    </div>
+  </div>
+
+  <div class="section-title">Ablauf</div>
+
+  <div class="phase-card">
+    <div class="phase-header"><div class="phase-name">Warm-up</div><div class="phase-badge badge-low">Tief</div></div>
+    <div class="phase-detail">Lockeres Tempo, leichter Widerstand – Körper auf Temperatur bringen</div>
+    <div class="interval-row">
+      <div class="int-col"><div class="int-label">Dauer</div><div class="int-val">5</div><div class="int-unit">Minuten</div></div>
+      <div class="int-col"><div class="int-label">Intensität</div><div class="int-val">~50%</div><div class="int-unit">Max-Puls</div></div>
+    </div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><div class="phase-name">Intervall – Hochphase</div><div class="phase-badge badge-high">Hoch</div></div>
+    <div class="phase-detail">Anstrengend – du kannst kaum sprechen. Tempo & Widerstand rauf.</div>
+    <div class="interval-row">
+      <div class="int-col"><div class="int-label">Dauer</div><div class="int-val">60</div><div class="int-unit">Sekunden</div></div>
+      <div class="int-col"><div class="int-label">Intensität</div><div class="int-val">85%</div><div class="int-unit">Max-Puls</div></div>
+    </div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><div class="phase-name">Erholung</div><div class="phase-badge badge-low">Tief</div></div>
+    <div class="phase-detail">Tempo stark reduzieren, Atem erholen – aber nicht stoppen</div>
+    <div class="interval-row">
+      <div class="int-col"><div class="int-label">Dauer</div><div class="int-val">120</div><div class="int-unit">Sekunden</div></div>
+      <div class="int-col"><div class="int-label">Intensität</div><div class="int-val">~55%</div><div class="int-unit">Max-Puls</div></div>
+    </div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><div class="phase-name">Runden × 6–8</div><div class="phase-badge badge-mid">Gesamt ~20 Min</div></div>
+    <div class="phase-detail">Nach 6 Runden: Cool-down 5 Min locker ausfahren</div>
+    <div class="interval-row">
+      <div class="int-col"><div class="int-label">Start</div><div class="int-val">6</div><div class="int-unit">Runden</div></div>
+      <div class="int-col"><div class="int-label">Ziel</div><div class="int-val">8</div><div class="int-unit">Runden</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">Einstellungen speichern</div>
+  <div class="notes-card">
+    <h4>Widerstand & Notizen</h4>
+    <input class="editable" data-id="int_widerstand" type="text" inputmode="text" placeholder="Widerstand (z.B. Stufe 8)" style="margin-bottom:8px;">
+    <textarea class="notes-input" data-id="int_notizen" placeholder="Notizen zur Session..."></textarea>
+  </div>
+
+</div>
+
+<!-- ===== STEADY STATE ===== -->
+<div class="day" id="day-steady">
+
+  <div class="intro-card">
+    <h3>🌊 Steady State – 40–50 Min</h3>
+    <p>Gleichmässiges Tempo, moderate Intensität. Stärkt die Grundlagenausdauer und fördert die Erholung nach der Kraftwoche.</p>
+  </div>
+
+  <div class="section-title">Session-Timer</div>
+  <div class="steady-timer">
+    <div class="timer-label" id="steadyLabel">Zieldauer einstellen</div>
+    <div class="steady-display" id="steadyDisplay">00:00</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0% abgeschlossen</div>
+    <div style="margin-top:14px; display:flex; align-items:center; gap:10px; justify-content:center;">
+      <div style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);">Ziel (Min):</div>
+      <input class="editable" id="steady_goal" type="number" inputmode="numeric" value="40" style="width:70px;">
+    </div>
+    <div class="timer-btns" style="margin-top:14px;">
+      <button class="timer-btn btn-start" id="steadyStartBtn" onclick="toggleSteady()">▶ Start</button>
+      <button class="timer-btn btn-reset" onclick="resetSteady()">↺ Reset</button>
+    </div>
+  </div>
+
+  <div class="section-title">Ablauf</div>
+
+  <div class="phase-card">
+    <div class="phase-header"><div class="phase-name">Warm-up</div><div class="phase-badge badge-low">Tief</div></div>
+    <div class="phase-detail">Langsam einfahren, Gelenke aufwärmen</div>
+    <div class="interval-row">
+      <div class="int-col"><div class="int-label">Dauer</div><div class="int-val">5</div><div class="int-unit">Minuten</div></div>
+      <div class="int-col"><div class="int-label">Puls</div><div class="int-val">~55%</div><div class="int-unit">Max-Puls</div></div>
+    </div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><div class="phase-name">Hauptteil</div><div class="phase-badge badge-mid">Moderat</div></div>
+    <div class="phase-detail">Du kannst sprechen aber nicht singen – gleichmässiges Tempo halten</div>
+    <div class="interval-row">
+      <div class="int-col"><div class="int-label">Dauer</div><div class="int-val">30–40</div><div class="int-unit">Minuten</div></div>
+      <div class="int-col"><div class="int-label">Puls</div><div class="int-val">65–75%</div><div class="int-unit">Max-Puls</div></div>
+    </div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><div class="phase-name">Cool-down</div><div class="phase-badge badge-low">Tief</div></div>
+    <div class="phase-detail">Tempo rausnehmen, Puls senken lassen</div>
+    <div class="interval-row">
+      <div class="int-col"><div class="int-label">Dauer</div><div class="int-val">5</div><div class="int-unit">Minuten</div></div>
+      <div class="int-col"><div class="int-label">Puls</div><div class="int-val">~50%</div><div class="int-unit">Max-Puls</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">Zielpuls berechnen</div>
+  <div class="notes-card">
+    <h4>Dein Alter eingeben</h4>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
+      <input class="editable" id="alter_input" type="number" inputmode="numeric" placeholder="z.B. 35" style="width:100px;" oninput="calcPuls()">
+      <div style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--muted);">Jahre</div>
+    </div>
+    <div id="puls_result" style="font-family:'DM Mono',monospace;font-size:0.82rem;color:var(--muted);line-height:1.8;"></div>
+  </div>
+
+  <div class="section-title">Widerstand & Notizen</div>
+  <div class="notes-card">
+    <h4>Session-Details</h4>
+    <input class="editable" data-id="steady_widerstand" type="text" inputmode="text" placeholder="Widerstand (z.B. Stufe 6)" style="margin-bottom:8px;">
+    <textarea class="notes-input" data-id="steady_notizen" placeholder="Notizen zur Session..."></textarea>
+  </div>
+
+</div>
+
+<!-- ===== PROGRESSION ===== -->
+<div class="day" id="day-progression">
+
+  <div class="intro-card">
+    <h3>📈 8-Wochen Progression</h3>
+    <p>Steigere dich wöchentlich – so verbesserst du Kondition und Ausdauer systematisch ohne Überbelastung.</p>
+  </div>
+
+  <div class="section-title">Intervall (Dienstag)</div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;">
+    <table class="prog-table">
+      <tr><th>Woche</th><th>Runden</th><th>Hochphase</th><th>Widerstand</th></tr>
+      <tr class="current"><td>1–2</td><td>6 Runden</td><td>60 Sek</td><td>Basis</td></tr>
+      <tr><td>3–4</td><td>7 Runden</td><td>60 Sek</td><td>Basis</td></tr>
+      <tr><td>5–6</td><td>8 Runden</td><td>60 Sek</td><td>Basis</td></tr>
+      <tr><td>7–8</td><td>8 Runden</td><td>75 Sek</td><td>+1 Stufe</td></tr>
+    </table>
+  </div>
+
+  <div class="section-title">Steady State (Samstag)</div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:24px;">
+    <table class="prog-table">
+      <tr><th>Woche</th><th>Dauer</th><th>Widerstand</th></tr>
+      <tr class="current"><td>1–2</td><td>30 Min</td><td>Basis</td></tr>
+      <tr><td>3–4</td><td>35 Min</td><td>Basis</td></tr>
+      <tr><td>5–6</td><td>40 Min</td><td>Basis</td></tr>
+      <tr><td>7–8</td><td>45 Min</td><td>+1 Stufe</td></tr>
+    </table>
+  </div>
+
+  <div class="section-title">Aktuelle Woche</div>
+  <div class="notes-card" style="margin-bottom:16px;">
+    <h4>Wo stehe ich gerade?</h4>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--muted);">Woche:</div>
+      <input class="editable" data-id="prog_woche" type="number" inputmode="numeric" placeholder="1" style="width:80px;">
+    </div>
+    <textarea class="notes-input" data-id="prog_notizen" placeholder="Fortschritt, Gefühl, Ziele..."></textarea>
+  </div>
+
+  <div class="section-title">Tipps</div>
+  <div class="tip-card"><div class="tip-icon">💓</div><div class="tip-text"><strong>Puls tracken:</strong> Nutze eine Smartwatch – der Puls ist der beste Indikator für die richtige Intensität.</div></div>
+  <div class="tip-card"><div class="tip-icon">🍌</div><div class="tip-text"><strong>Snack vorher:</strong> 30–60 Min vor dem Training eine Banane oder Haferflocken – kein Training auf nüchternem Magen.</div></div>
+  <div class="tip-card"><div class="tip-icon">🥛</div><div class="tip-text"><strong>Protein danach:</strong> 20–30g Protein nach dem Ausdauertraining – verhindert Muskelabbau (Quark, Shake, Eier).</div></div>
+  <div class="tip-card"><div class="tip-icon">🔧</div><div class="tip-text"><strong>Crosstrainer-Technik:</strong> Arme aktiv mitbewegen, Fersen auf der Plattform, aufrechter Oberkörper – kein Rundrücken.</div></div>
+
+</div>
+</div><!-- end content -->
+
+<div class="bottom-nav">
+  <button class="nav-btn active-nav" id="nav-intervall" onclick="showDay('intervall',this);updateNav('intervall')">Di · Intervall</button>
+  <button class="nav-btn" id="nav-steady" onclick="showDay('steady',this);updateNav('steady')">Sa · Steady</button>
+  <button class="nav-btn" id="nav-progression" onclick="showDay('progression',this);updateNav('progression')">Progression</button>
+</div>
+
+<div class="toast" id="toast">✓ Gespeichert</div>
+
+<script>
+const STORAGE_KEY = 'ausdauerplan_v1';
+
+// ---- NAV ----
+function showDay(id, el) {
+  document.querySelectorAll('.day').forEach(d => d.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('day-' + id).classList.add('active');
+  if (el && el.classList.contains('tab')) el.classList.add('active');
+}
+function updateNav(active) {
+  ['intervall','steady','progression'].forEach(id => {
+    document.getElementById('nav-' + id).classList.toggle('active-nav', id === active);
+  });
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['intervall','steady','progression'][i] === active);
+  });
+}
+
+// ---- INTERVAL TIMER ----
+let intTimer = null, intSeconds = 0, intPhase = 'warmup', intRound = 0, intRunning = false;
+
+function getIntSettings() {
+  return {
+    high: parseInt(document.getElementById('int_high').value) || 60,
+    low: parseInt(document.getElementById('int_low').value) || 120,
+    rounds: parseInt(document.getElementById('int_rounds').value) || 6
+  };
+}
+
+function toggleTimer() {
+  if (intRunning) {
+    clearInterval(intTimer);
+    intRunning = false;
+    document.getElementById('startBtn').textContent = '▶ Weiter';
+  } else {
+    if (intPhase === 'warmup' && intSeconds === 0) {
+      intSeconds = 300; // 5 min warmup
+      document.getElementById('timerLabel').textContent = 'Warm-up';
+      document.getElementById('timerPhase').textContent = 'Locker einfahren';
+      document.getElementById('timerPhase').className = 'timer-phase rest';
+      document.getElementById('timerDisplay').className = 'timer-display';
+      document.getElementById('totalRounds').textContent = getIntSettings().rounds;
+    }
+    intRunning = true;
+    document.getElementById('startBtn').textContent = '⏸ Pause';
+    intTimer = setInterval(tickInterval, 1000);
+  }
+}
+
+function tickInterval() {
+  const s = getIntSettings();
+  intSeconds--;
+  updateTimerDisplay(intSeconds);
+  if (intSeconds <= 0) {
+    if (intPhase === 'warmup') {
+      intPhase = 'high'; intRound = 1; intSeconds = s.high;
+      setTimerPhase('high', intRound, s.rounds);
+    } else if (intPhase === 'high') {
+      if (intRound >= s.rounds) {
+        intPhase = 'cooldown'; intSeconds = 300;
+        document.getElementById('timerLabel').textContent = 'Cool-down';
+        document.getElementById('timerPhase').textContent = 'Locker ausfahren ✓';
+        document.getElementById('timerPhase').className = 'timer-phase rest';
+        document.getElementById('timerDisplay').className = 'timer-display';
+      } else {
+        intPhase = 'low'; intSeconds = s.low;
+        document.getElementById('timerLabel').textContent = 'Erholung';
+        document.getElementById('timerPhase').textContent = 'Atem erholen – weiter fahren';
+        document.getElementById('timerPhase').className = 'timer-phase rest';
+        document.getElementById('timerDisplay').className = 'timer-display';
+      }
+    } else if (intPhase === 'low') {
+      intRound++; intPhase = 'high'; intSeconds = s.high;
+      setTimerPhase('high', intRound, s.rounds);
+    } else if (intPhase === 'cooldown') {
+      clearInterval(intTimer); intRunning = false;
+      document.getElementById('timerLabel').textContent = 'Fertig! 🎉';
+      document.getElementById('timerPhase').textContent = 'Super Einheit!';
+      document.getElementById('startBtn').textContent = '▶ Start';
+    }
+    document.getElementById('currentRound').textContent = intRound;
+  }
+}
+
+function setTimerPhase(phase, round, total) {
+  document.getElementById('timerLabel').textContent = `Intervall – Runde ${round} / ${total}`;
+  document.getElementById('timerPhase').textContent = 'GO! Tempo & Widerstand rauf!';
+  document.getElementById('timerPhase').className = 'timer-phase go';
+  document.getElementById('timerDisplay').className = 'timer-display high';
+}
+
+function updateTimerDisplay(s) {
+  const m = Math.floor(s / 60), sec = s % 60;
+  document.getElementById('timerDisplay').textContent = String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+}
+
+function resetTimer() {
+  clearInterval(intTimer);
+  intTimer = null; intSeconds = 0; intPhase = 'warmup'; intRound = 0; intRunning = false;
+  document.getElementById('timerDisplay').textContent = '01:00';
+  document.getElementById('timerDisplay').className = 'timer-display';
+  document.getElementById('timerLabel').textContent = 'Bereit zum Start';
+  document.getElementById('timerPhase').textContent = 'Drücke Start für das Warm-up';
+  document.getElementById('timerPhase').className = 'timer-phase';
+  document.getElementById('currentRound').textContent = '0';
+  document.getElementById('startBtn').textContent = '▶ Start';
+}
+
+// ---- STEADY TIMER ----
+let steadyTimer = null, steadyElapsed = 0, steadyRunning = false;
+
+function toggleSteady() {
+  if (steadyRunning) {
+    clearInterval(steadyTimer);
+    steadyRunning = false;
+    document.getElementById('steadyStartBtn').textContent = '▶ Weiter';
+  } else {
+    steadyRunning = true;
+    document.getElementById('steadyStartBtn').textContent = '⏸ Pause';
+    steadyTimer = setInterval(tickSteady, 1000);
+  }
+}
+
+function tickSteady() {
+  steadyElapsed++;
+  const m = Math.floor(steadyElapsed / 60), s = steadyElapsed % 60;
+  document.getElementById('steadyDisplay').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  const goal = (parseInt(document.getElementById('steady_goal').value) || 40) * 60;
+  const pct = Math.min(100, Math.round((steadyElapsed / goal) * 100));
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = pct + '% abgeschlossen';
+  document.getElementById('steadyLabel').textContent = pct >= 100 ? 'Ziel erreicht! 🎉' : 'Session läuft...';
+}
+
+function resetSteady() {
+  clearInterval(steadyTimer);
+  steadyTimer = null; steadyElapsed = 0; steadyRunning = false;
+  document.getElementById('steadyDisplay').textContent = '00:00';
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressLabel').textContent = '0% abgeschlossen';
+  document.getElementById('steadyLabel').textContent = 'Zieldauer einstellen';
+  document.getElementById('steadyStartBtn').textContent = '▶ Start';
+}
+
+// ---- PULS CALC ----
+function calcPuls() {
+  const age = parseInt(document.getElementById('alter_input').value);
+  if (!age || age < 10 || age > 100) { document.getElementById('puls_result').textContent = ''; return; }
+  const max = 220 - age;
+  document.getElementById('puls_result').innerHTML =
+    `Max-Puls: <span style="color:var(--text)">${max} bpm</span><br>` +
+    `Steady State Zone (65–75%): <span style="color:var(--accent)">${Math.round(max*0.65)}–${Math.round(max*0.75)} bpm</span><br>` +
+    `Intervall Hochphase (85%): <span style="color:var(--accent2)">${Math.round(max*0.85)} bpm</span>`;
+}
+
+// ---- STORAGE ----
+function saveAll() {
+  const data = {};
+  document.querySelectorAll('[data-id]').forEach(el => {
+    if (el.value && el.value.trim()) data[el.dataset.id] = el.value.trim();
+  });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function loadAll() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    Object.entries(data).forEach(([id, val]) => {
+      const el = document.querySelector('[data-id="' + id + '"]');
+      if (el) el.value = val;
+    });
+  } catch(e) {}
+}
+
+document.addEventListener('change', e => { if (e.target.dataset.id) saveAll(); });
+loadAll();
+</script>
+</body>
+</html>
