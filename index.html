@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Trainingsplan</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --surface2: #1c1c1c;
+  --border: #2a2a2a;
+  --accent: #c8f53a;
+  --accent2: #ff5c3a;
+  --blue: #4a9eff;
+  --text: #f0f0ee;
+  --muted: #666;
+  --muted2: #3a3a3a;
+  --input-bg: #222;
+  --input-active: #2a2a2a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { font-size: 16px; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+
+/* HEADER */
+.header {
+  padding: 28px 20px 20px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 100;
+}
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 2px; line-height: 1; }
+.header h1 span { color: var(--accent); }
+.save-btn {
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 1px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.save-btn:active { opacity: 0.8; }
+.save-status {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-align: right;
+  margin-top: 4px;
+  min-height: 16px;
+}
+.save-status.saved { color: var(--accent); }
+
+/* TABS */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky;
+  top: 100px;
+  z-index: 99;
+}
+.tab {
+  flex: 1;
+  padding: 14px 4px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s;
+}
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* CONTENT */
+.content { padding: 0 16px; }
+.day { display: none; padding-top: 20px; }
+.day.active { display: block; }
+
+.day-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.warmup {
+  background: var(--surface2);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 14px;
+  font-size: 0.78rem;
+  color: #aacc44;
+  margin-bottom: 24px;
+  font-family: 'DM Mono', monospace;
+  line-height: 1.4;
+}
+
+/* SECTION */
+.section-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 24px 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* EXERCISE CARD */
+.ex-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.ex-card.highlight { border-color: #ff5c3a44; }
+
+.ex-top {
+  padding: 14px 14px 10px;
+}
+.ex-name {
+  font-weight: 600;
+  font-size: 0.92rem;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+.ex-muscle {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+}
+.ex-tip {
+  font-size: 0.75rem;
+  color: #555;
+  margin-top: 5px;
+  line-height: 1.4;
+  font-style: italic;
+}
+.new-tag {
+  font-size: 0.6rem;
+  background: var(--accent2);
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'DM Mono', monospace;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* SETS ROW */
+.sets-row {
+  display: flex;
+  gap: 0;
+  border-top: 1px solid var(--border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.set-col {
+  flex: 1;
+  min-width: 72px;
+  border-right: 1px solid var(--border);
+  padding: 10px 8px;
+  text-align: center;
+}
+.set-col:last-child { border-right: none; }
+.set-header {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.set-header.accent { color: var(--accent); }
+
+/* EDITABLE FIELD */
+.field-wrap { position: relative; }
+.editable {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: center;
+  padding: 7px 4px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.editable:focus {
+  border-color: var(--accent);
+  background: var(--input-active);
+}
+.editable.reps {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.editable.weight {
+  color: var(--accent);
+}
+.editable.placeholder-style { color: var(--muted); }
+
+/* REST / PAUSE */
+.rest-row {
+  padding: 8px 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.rest-label { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.rest-val { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--muted); }
+
+/* SUPERSET */
+.superset-bar {
+  background: #ff990011;
+  border-left: 2px solid #ff9900;
+  border-right: 2px solid #ff9900;
+  padding: 5px 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  color: #ff9900;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+/* BOTTOM NAV */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #0f0f0f;
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding: 12px 16px 20px;
+  gap: 10px;
+  z-index: 200;
+}
+.nav-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  text-align: center;
+}
+.nav-btn.active-nav {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--accent);
+  color: #000;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.78rem;
+  padding: 10px 20px;
+  border-radius: 999px;
+  opacity: 0;
+  transition: all 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 300;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <h1>TRAINING <span>PLAN</span></h1>
+    <button class="save-btn" onclick="saveAll()">💾 Speichern</button>
+  </div>
+  <div class="save-status" id="saveStatus">Tippe auf ein Gewicht zum Bearbeiten</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showDay('a',this)">Plan A</button>
+  <button class="tab" onclick="showDay('b',this)">Plan B</button>
+  <button class="tab" onclick="showDay('c',this)">Plan C</button>
+</div>
+
+<div class="content">
+
+<!-- ===== TAG A ===== -->
+<div class="day active" id="day-a">
+  <div class="day-label">Montag · Rücken / Brust / Schultern / Beine / Arme / Core</div>
+  <div class="warmup">⚡ 8 Min Ruder-Ergometer + Schulterkreisen + Aufwärmsätze</div>
+
+  <div class="section-title">Rücken</div>
+
+  <div class="ex-card">
+    <div class="ex-top">
+      <div class="ex-name">Klimmzüge (weighted)</div>
+      <div class="ex-muscle">Lats, Bizeps, Rhomben</div>
+      <div class="ex-tip">Volle ROM, 3 Sek negativ senken</div>
+    </div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Zusatz-Kg</div><input class="editable weight" data-id="a_klimmzug_weight" type="text" inputmode="decimal" placeholder="34.47"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="a_klimmzug_reps" type="text" inputmode="text" placeholder="6–9"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">2–3 Min</span></div>
+  </div>
+
+  <div class="ex-card highlight">
+    <div class="ex-top">
+      <div class="ex-name">Einarmiges KH-Rudern <span class="new-tag">NEU</span></div>
+      <div class="ex-muscle">Mittl. Rücken, Rhomben</div>
+      <div class="ex-tip">Horizontales Ziehen – wichtig für Schulterbalance</div>
+    </div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="a_rudern_weight" type="text" inputmode="decimal" placeholder="–"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="a_rudern_reps" type="text" inputmode="text" placeholder="10–12"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">90 Sek</span></div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-top">
+      <div class="ex-name">Hyperextensions</div>
+      <div class="ex-muscle">Erector spinae, Po</div>
+      <div class="ex-tip">Langsam, kein Schwung</div>
+    </div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="a_hyperext_weight" type="text" inputmode="decimal" placeholder="BW"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="a_hyperext_reps" type="text" inputmode="text" placeholder="12–15"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">60 Sek</span></div>
+  </div>
+
+  <div class="section-title">Brust</div>
+
+  <div class="ex-card">
+    <div class="ex-top">
+      <div class="ex-name">Maschine Schrägbankdrücken (Sitz 6)</div>
+      <div class="ex-muscle">Obere Brust, Schultern</div>
+      <div class="ex-tip">Schulterblätter zusammen, kontrolliert senken</div>
+    </div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="a_schraeg_weight" type="text" inputmode="decimal" placeholder="50"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="a_schraeg_reps" type="text" inputmode="text" placeholder="8–10"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">2 Min</span></div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-top">
+      <div class="ex-name">Dumbbell Flys (Flachbank)</div>
+      <div class="ex-muscle">Brust, vord. Schulter</div>
+      <div class="ex-tip">Leichte Beugung im Ellbogen, Dehnung spüren</div>
+    </div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg (pro KH)</div><input class="editable weight" data-id="a_flys_weight" type="text" inputmode="decimal" placeholder="7"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="a_flys_reps" type="text" inputmode="text" placeholder="10–12"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">90 Sek</span></div>
+  </div>
+
+  <div class="section-title">Schultern</div>
+
+  <div class="ex-card">
+    <div class="ex-top">
+      <div class="ex-name">Schulterdrücken Maschine (Sitz 4)</div>
+      <div class="ex-muscle">Schultern, Trizeps</div>
+    </div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="a_ohp_weight" type="text" inputmode="decimal" placeholder="20"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="a_ohp_reps" type="text" inputmode="text" placeholder="8–12"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">2 Min</span></div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-top">
+      <div class="ex-name">Seitheben Kurzhanteln</div>
+      <div class="ex-muscle">Seitl. Schulter (Deltoid)</div>
+    </div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg (pro KH)</div><input class="editable weight" data-id="a_seith_weight" type="text" inputmode="decimal" placeholder="3"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="a_seith_reps" type="text" inputmode="text" placeholder="10–12"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">60 Sek</span></div>
+  </div>
+
+  <div class="section-title">Beine</div>
+
+  <div class="ex-card">
+    <div class="ex-top">
+      <div class="ex-name">Beinpresse A2 (Rückenlehne 3, Füsse 1–2)</div>
+      <div class="ex-muscle">Quads, Po, Hamstrings</div>
+    </div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="a_beinpresse_weight" type="text" inputmode="decimal" placeholder="190"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">4</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="a_beinpresse_reps" type="text" inputmode="text" placeholder="8–12"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">2–3 Min</span></div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-top">
+      <div class="ex-name">Glute Bridges</div>
+      <div class="ex-muscle">Po, hintere Kette</div>
+    </div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="a_glute_weight" type="text" inputmode="decimal" placeholder="BW"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="a_glute_reps" type="text" inputmode="text" placeholder="10–12"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">60 Sek</span></div>
+  </div>
+
+  <div class="section-title">Arme</div>
+
+  <div class="ex-card">
+    <div class="ex-top">
+      <div class="ex-name">KH Bizeps Curls</div>
+      <div class="ex-muscle">Bizeps</div>
+    </div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg (pro KH)</div><input class="editable weight" data-id="a_curl_weight" type="text" inputmode="decimal" placeholder="8"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="a_curl_reps" type="text" inputmode="text" placeholder="8–12"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">60 Sek</span></div>
+  </div>
+
+  <div class="section-title">Core</div>
+
+  <div class="ex-card">
+    <div class="ex-top">
+      <div class="ex-name">Beinheben</div>
+      <div class="ex-muscle">Core, Hüftbeuger</div>
+    </div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="a_bein_weight" type="text" inputmode="decimal" placeholder="BW"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">2</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="a_bein_reps" type="text" inputmode="text" placeholder="8–10"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">60 Sek</span></div>
+  </div>
+
+  <div class="ex-card">
+    <div class="ex-top">
+      <div class="ex-name">Plank</div>
+      <div class="ex-muscle">Core, Schultern</div>
+    </div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Sek</div><input class="editable weight" data-id="a_plank_time" type="text" inputmode="decimal" placeholder="45–60"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><div style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--muted);padding:7px 0;">–</div></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">60 Sek</span></div>
+  </div>
+</div>
+
+<!-- ===== TAG B ===== -->
+<div class="day" id="day-b">
+  <div class="day-label">Mittwoch · Rücken / Brust / Schultern / Beine / Arme / Core</div>
+  <div class="warmup">⚡ 5 Min Fahrradergometer + Schulterkreisen + Hüftmobilisation</div>
+
+  <div class="section-title">Rücken</div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Klimmzüge (weighted)</div><div class="ex-muscle">Lats, Bizeps</div><div class="ex-tip">Bei Erschöpfung → auf Latzug wechseln</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Zusatz-Kg</div><input class="editable weight" data-id="b_klimmzug_weight" type="text" inputmode="decimal" placeholder="34.47"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="b_klimmzug_reps" type="text" inputmode="text" placeholder="6–9"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">2–3 Min</span></div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Kabelrudern B4 (Sitz 3, Brust 5)</div><div class="ex-muscle">Mittl. Rücken, Rhomben</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="b_rudern_weight" type="text" inputmode="decimal" placeholder="30.7"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="b_rudern_reps" type="text" inputmode="text" placeholder="8–12"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">90 Sek</span></div>
+  </div>
+
+  <div class="section-title">Brust</div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Schrägbankdrücken KH</div><div class="ex-muscle">Obere Brust</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg (pro KH)</div><input class="editable weight" data-id="b_schraeg_weight" type="text" inputmode="decimal" placeholder="7"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="b_schraeg_reps" type="text" inputmode="text" placeholder="8–10"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">2 Min</span></div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Dips (weighted)</div><div class="ex-muscle">Brust, Trizeps</div><div class="ex-tip">Leicht nach vorne lehnen für Brustfokus</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Zusatz-Kg</div><input class="editable weight" data-id="b_dips_weight" type="text" inputmode="decimal" placeholder="29.03"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="b_dips_reps" type="text" inputmode="text" placeholder="10–12"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">2 Min</span></div>
+  </div>
+
+  <div class="section-title">Schultern — Prävention</div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Butterfly Reverse D2 (Sitz 3)</div><div class="ex-muscle">Hintere Schulter, Rhomben</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="b_reverse_weight" type="text" inputmode="decimal" placeholder="22.7"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="b_reverse_reps" type="text" inputmode="text" placeholder="10–12"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">90 Sek</span></div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Aussenrotation Theraband</div><div class="ex-muscle">Rotatorenmanschette</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Stärke</div><input class="editable weight" data-id="b_theraband_weight" type="text" inputmode="text" placeholder="–"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="b_theraband_reps" type="text" inputmode="text" placeholder="15"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">45 Sek</span></div>
+  </div>
+
+  <div class="section-title">Beine — Isolation</div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Beinstrecker A4 (Sitz 3, Polster 3)</div><div class="ex-muscle">Quadrizeps</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="b_strecker_weight" type="text" inputmode="decimal" placeholder="35"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="b_strecker_reps" type="text" inputmode="text" placeholder="8–12"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">90 Sek</span></div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Beinbeuger A5 (Sitz 3, Rad 2, Polster 3)</div><div class="ex-muscle">Hamstrings</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="b_beuger_weight" type="text" inputmode="decimal" placeholder="35"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="b_beuger_reps" type="text" inputmode="text" placeholder="8–12"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">90 Sek</span></div>
+  </div>
+
+  <div class="section-title">Arme — Superset</div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Trizepsdrücken Seil</div><div class="ex-muscle">Trizeps</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="b_trizeps_weight" type="text" inputmode="decimal" placeholder="50"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="b_trizeps_reps" type="text" inputmode="text" placeholder="8–12"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">Superset ↓</span></div>
+  </div>
+  <div class="superset-bar">⚡ SUPERSET – direkt weiter</div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Shrugs KH (Trapezius)</div><div class="ex-muscle">Trapezius (Rücken)</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg (pro KH)</div><input class="editable weight" data-id="b_shrugs_weight" type="text" inputmode="decimal" placeholder="20"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="b_shrugs_reps" type="text" inputmode="text" placeholder="12–15"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">90 Sek</span></div>
+  </div>
+
+  <div class="section-title">Core</div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Abcoaster</div><div class="ex-muscle">Core, Hüftbeuger</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Zusatz-Kg</div><input class="editable weight" data-id="b_abcoaster_weight" type="text" inputmode="decimal" placeholder="+5"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">4</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="b_abcoaster_reps" type="text" inputmode="text" placeholder="12–15"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">60 Sek</span></div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Plank</div><div class="ex-muscle">Core</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Sek</div><input class="editable weight" data-id="b_plank_time" type="text" inputmode="decimal" placeholder="45–60"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">2</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><div style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--muted);padding:7px 0;">–</div></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">60 Sek</span></div>
+  </div>
+</div>
+
+<!-- ===== TAG C ===== -->
+<div class="day" id="day-c">
+  <div class="day-label">Freitag · Rücken / Brust / Schultern / Beine / Arme / Core</div>
+  <div class="warmup">⚡ 5 Min Ellipsentrainer + dynamische Dehnung</div>
+
+  <div class="section-title">Rücken</div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Klimmzüge / Latzug (bei Erschöpfung)</div><div class="ex-muscle">Lats, Bizeps</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="c_klimmzug_weight" type="text" inputmode="decimal" placeholder="34.47"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="c_klimmzug_reps" type="text" inputmode="text" placeholder="6–9"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">2–3 Min</span></div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Latzug B6 (Sitz 3, Oberschenkel 2)</div><div class="ex-muscle">Lats, Bizeps</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="c_latzug_weight" type="text" inputmode="decimal" placeholder="31.7"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="c_latzug_reps" type="text" inputmode="text" placeholder="8–12"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">90 Sek</span></div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Hyperextensions</div><div class="ex-muscle">Erector spinae, Po</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="c_hyperext_weight" type="text" inputmode="decimal" placeholder="BW"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="c_hyperext_reps" type="text" inputmode="text" placeholder="12–15"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">60 Sek</span></div>
+  </div>
+
+  <div class="section-title">Brust</div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Flachbank KH Drücken</div><div class="ex-muscle">Brust, Trizeps</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg (pro KH)</div><input class="editable weight" data-id="c_flach_weight" type="text" inputmode="decimal" placeholder="8"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="c_flach_reps" type="text" inputmode="text" placeholder="8–10"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">2 Min</span></div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Butterfly B7 (Sitz 3)</div><div class="ex-muscle">Brust (Isolation)</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="c_butterfly_weight" type="text" inputmode="decimal" placeholder="22.7"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="c_butterfly_reps" type="text" inputmode="text" placeholder="10–12"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">90 Sek</span></div>
+  </div>
+
+  <div class="section-title">Schultern</div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Schulterdrücken Maschine (Sitz 4)</div><div class="ex-muscle">Schultern, Trizeps</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="c_ohp_weight" type="text" inputmode="decimal" placeholder="20"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="c_ohp_reps" type="text" inputmode="text" placeholder="8–12"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">2 Min</span></div>
+  </div>
+
+  <div class="section-title">Beine</div>
+  <div class="ex-card highlight">
+    <div class="ex-top"><div class="ex-name">Romanian Deadlift (RDL) <span class="new-tag">NEU</span></div><div class="ex-muscle">Hamstrings, Po, Rücken</div><div class="ex-tip">Rücken gerade, Dehnung der Hamstrings spüren</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="c_rdl_weight" type="text" inputmode="decimal" placeholder="–"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="c_rdl_reps" type="text" inputmode="text" placeholder="8–10"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">2 Min</span></div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Adduktoren</div><div class="ex-muscle">Innerer Oberschenkel</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="c_addukt_weight" type="text" inputmode="decimal" placeholder="30"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">2</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="c_addukt_reps" type="text" inputmode="text" placeholder="12–15"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">60 Sek</span></div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Abduktoren</div><div class="ex-muscle">Äuss. Oberschenkel</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="c_abdukt_weight" type="text" inputmode="decimal" placeholder="30"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">2</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="c_abdukt_reps" type="text" inputmode="text" placeholder="12–15"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">60 Sek</span></div>
+  </div>
+
+  <div class="section-title">Arme</div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Überkopf-Trizepsstrecken KH</div><div class="ex-muscle">Trizeps (langer Kopf)</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="c_trizeps_weight" type="text" inputmode="decimal" placeholder="10"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="c_trizeps_reps" type="text" inputmode="text" placeholder="8–12"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">90 Sek</span></div>
+  </div>
+
+  <div class="section-title">Core</div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Cable Woodchopper High to Low</div><div class="ex-muscle">Obliques, Core</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="c_woodchop_weight" type="text" inputmode="decimal" placeholder="10"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="c_woodchop_reps" type="text" inputmode="text" placeholder="10–12"></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">60 Sek</span></div>
+  </div>
+  <div class="ex-card">
+    <div class="ex-top"><div class="ex-name">Plank</div><div class="ex-muscle">Core</div></div>
+    <div class="sets-row">
+      <div class="set-col"><div class="set-header accent">Sek</div><input class="editable weight" data-id="c_plank_time" type="text" inputmode="decimal" placeholder="45–60"></div>
+      <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">2</div></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><div style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--muted);padding:7px 0;">–</div></div>
+    </div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">60 Sek</span></div>
+  </div>
+</div>
+
+</div><!-- end content -->
+
+<div class="bottom-nav">
+  <button class="nav-btn active-nav" id="nav-a" onclick="showDay('a',this); updateNav('a')">Plan A</button>
+  <button class="nav-btn" id="nav-b" onclick="showDay('b',this); updateNav('b')">Plan B</button>
+  <button class="nav-btn" id="nav-c" onclick="showDay('c',this); updateNav('c')">Plan C</button>
+</div>
+
+<div class="toast" id="toast">✓ Gespeichert</div>
+
+<script>
+const STORAGE_KEY = 'trainingsplan_weights_v2';
+
+function showDay(id, el) {
+  document.querySelectorAll('.day').forEach(d => d.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('day-' + id).classList.add('active');
+  if (el && el.classList.contains('tab')) el.classList.add('active');
+}
+
+function updateNav(active) {
+  ['a','b','c'].forEach(id => {
+    document.getElementById('nav-' + id).classList.toggle('active-nav', id === active);
+  });
+  // sync tabs too
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['a','b','c'][i] === active);
+  });
+}
+
+function saveAll() {
+  const data = {};
+  document.querySelectorAll('[data-id]').forEach(el => {
+    if (el.value.trim()) data[el.dataset.id] = el.value.trim();
+  });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  showToast('✓ Gespeichert');
+  const status = document.getElementById('saveStatus');
+  status.textContent = 'Zuletzt gespeichert: ' + new Date().toLocaleTimeString('de-CH', {hour:'2-digit',minute:'2-digit'});
+  status.className = 'save-status saved';
+}
+
+function loadAll() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    Object.entries(data).forEach(([id, val]) => {
+      const el = document.querySelector('[data-id="' + id + '"]');
+      if (el) el.value = val;
+    });
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Gewichte geladen ✓';
+    status.className = 'save-status saved';
+  } catch(e) {}
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// Auto-save on input change
+document.addEventListener('change', e => {
+  if (e.target.dataset.id) {
+    saveAll();
+  }
+});
+
+// Load on start
+loadAll();
+</script>
+</body>
+</html>
