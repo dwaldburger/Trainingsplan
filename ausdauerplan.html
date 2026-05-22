@@ -206,16 +206,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <div class="phase-detail">Lockeres Tempo, leichter Widerstand – Körper auf Temperatur bringen</div>
     <div class="interval-row">
       <div class="int-col"><div class="int-label">Dauer</div><div class="int-val">5</div><div class="int-unit">Minuten</div></div>
-      <div class="int-col"><div class="int-label">Intensität</div><div class="int-val">~50%</div><div class="int-unit">Max-Puls</div></div>
+      <div class="int-col"><div class="int-label">Zielpuls</div><div class="int-val">110</div><div class="int-unit">bpm</div></div>
     </div>
   </div>
 
   <div class="phase-card">
     <div class="phase-header"><div class="phase-name">Intervall – Hochphase</div><div class="phase-badge badge-high">Hoch</div></div>
-    <div class="phase-detail">Anstrengend – du kannst kaum sprechen. Tempo & Widerstand rauf.</div>
+    <div class="phase-detail">Kaum sprechen möglich – Widerstand rauf bis Puls 150+ erreicht</div>
     <div class="interval-row">
       <div class="int-col"><div class="int-label">Dauer</div><div class="int-val">60</div><div class="int-unit">Sekunden</div></div>
-      <div class="int-col"><div class="int-label">Intensität</div><div class="int-val">85%</div><div class="int-unit">Max-Puls</div></div>
+      <div class="int-col"><div class="int-label">Zielpuls</div><div class="int-val">149–155</div><div class="int-unit">bpm</div></div>
     </div>
   </div>
 
@@ -224,7 +224,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <div class="phase-detail">Tempo stark reduzieren, Atem erholen – aber nicht stoppen</div>
     <div class="interval-row">
       <div class="int-col"><div class="int-label">Dauer</div><div class="int-val">120</div><div class="int-unit">Sekunden</div></div>
-      <div class="int-col"><div class="int-label">Intensität</div><div class="int-val">~55%</div><div class="int-unit">Max-Puls</div></div>
+      <div class="int-col"><div class="int-label">Zielpuls</div><div class="int-val">~116</div><div class="int-unit">bpm</div></div>
     </div>
   </div>
 
@@ -277,7 +277,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <div class="phase-detail">Langsam einfahren, Gelenke aufwärmen</div>
     <div class="interval-row">
       <div class="int-col"><div class="int-label">Dauer</div><div class="int-val">5</div><div class="int-unit">Minuten</div></div>
-      <div class="int-col"><div class="int-label">Puls</div><div class="int-val">~55%</div><div class="int-unit">Max-Puls</div></div>
+      <div class="int-col"><div class="int-label">Zielpuls</div><div class="int-val">110</div><div class="int-unit">bpm</div></div>
     </div>
   </div>
 
@@ -286,7 +286,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <div class="phase-detail">Du kannst sprechen aber nicht singen – gleichmässiges Tempo halten</div>
     <div class="interval-row">
       <div class="int-col"><div class="int-label">Dauer</div><div class="int-val">30–40</div><div class="int-unit">Minuten</div></div>
-      <div class="int-col"><div class="int-label">Puls</div><div class="int-val">65–75%</div><div class="int-unit">Max-Puls</div></div>
+      <div class="int-col"><div class="int-label">Zielpuls</div><div class="int-val">121–132</div><div class="int-unit">bpm</div></div>
     </div>
   </div>
 
@@ -295,18 +295,24 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <div class="phase-detail">Tempo rausnehmen, Puls senken lassen</div>
     <div class="interval-row">
       <div class="int-col"><div class="int-label">Dauer</div><div class="int-val">5</div><div class="int-unit">Minuten</div></div>
-      <div class="int-col"><div class="int-label">Puls</div><div class="int-val">~50%</div><div class="int-unit">Max-Puls</div></div>
+      <div class="int-col"><div class="int-label">Zielpuls</div><div class="int-val">~110</div><div class="int-unit">bpm</div></div>
     </div>
   </div>
 
-  <div class="section-title">Zielpuls berechnen</div>
-  <div class="notes-card">
-    <h4>Dein Alter eingeben</h4>
-    <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
-      <input class="editable" id="alter_input" type="number" inputmode="numeric" placeholder="z.B. 35" style="width:100px;" oninput="calcPuls()">
-      <div style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--muted);">Jahre</div>
-    </div>
-    <div id="puls_result" style="font-family:'DM Mono',monospace;font-size:0.82rem;color:var(--muted);line-height:1.8;"></div>
+  <div class="section-title">Deine persönlichen Pulszonen (Karvonen)</div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:12px;">
+    <table class="prog-table">
+      <tr><th>Zone</th><th>Bereich</th><th>Zielpuls</th></tr>
+      <tr><td>Warm-up</td><td>50–60%</td><td style="color:var(--accent)">110–121 bpm</td></tr>
+      <tr class="current"><td>Steady State</td><td>60–70%</td><td style="color:var(--accent)">121–132 bpm ✓</td></tr>
+      <tr><td>Ausdauer obere Zone</td><td>70–80%</td><td style="color:var(--accent)">132–143 bpm</td></tr>
+      <tr><td>HIIT Hochphase</td><td>85–90%</td><td style="color:#ff5c3a">149–155 bpm</td></tr>
+      <tr><td>Maximum</td><td>90–95%</td><td style="color:#ff5c3a">155–160 bpm</td></tr>
+    </table>
+  </div>
+  <div style="background:#3af5c808;border:1px solid #3af5c822;border-radius:10px;padding:12px 14px;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--muted);line-height:1.8;margin-bottom:12px;">
+    Ruhepuls: <span style="color:var(--text)">55 bpm</span> · HFmax: <span style="color:var(--text)">165 bpm</span> · Alter: <span style="color:var(--text)">67 Jahre</span><br>
+    HF-Reserve: <span style="color:var(--accent)">110 bpm</span> · Formel: Karvonen
   </div>
 
   <div class="section-title">Widerstand & Notizen</div>
@@ -520,16 +526,7 @@ function resetSteady() {
   document.getElementById('steadyStartBtn').textContent = '▶ Start';
 }
 
-// ---- PULS CALC ----
-function calcPuls() {
-  const age = parseInt(document.getElementById('alter_input').value);
-  if (!age || age < 10 || age > 100) { document.getElementById('puls_result').textContent = ''; return; }
-  const max = 220 - age;
-  document.getElementById('puls_result').innerHTML =
-    `Max-Puls: <span style="color:var(--text)">${max} bpm</span><br>` +
-    `Steady State Zone (65–75%): <span style="color:var(--accent)">${Math.round(max*0.65)}–${Math.round(max*0.75)} bpm</span><br>` +
-    `Intervall Hochphase (85%): <span style="color:var(--accent2)">${Math.round(max*0.85)} bpm</span>`;
-}
+
 
 // ---- STORAGE ----
 function saveAll() {
