@@ -65,6 +65,20 @@ body {
   min-height: 16px;
 }
 .save-status.saved { color: var(--accent); }
+.backup-row { display: flex; gap: 8px; margin-top: 2px; }
+.backup-btn {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.backup-btn:active { border-color: var(--accent); color: var(--accent); }
 
 /* TABS */
 .tabs {
@@ -315,6 +329,11 @@ body {
   <div class="header-top">
     <h1>TRAINING <span>PLAN</span></h1>
     <button class="save-btn" onclick="saveAll()">💾 Speichern</button>
+  </div>
+  <div class="backup-row">
+    <button class="backup-btn" onclick="exportData()">⬇ Export</button>
+    <button class="backup-btn" onclick="document.getElementById('importFile').click()">⬆ Import</button>
+    <input type="file" id="importFile" accept=".json,application/json" style="display:none" onchange="importData(this)">
   </div>
   <div class="save-status" id="saveStatus">Tippe auf ein Gewicht zum Bearbeiten</div>
 </div>
@@ -700,13 +719,13 @@ body {
 
   <div class="section-title">Beine</div>
   <div class="ex-card highlight">
-    <div class="ex-top"><div class="ex-name">Romanian Deadlift (RDL) <span class="new-tag">NEU</span></div><div class="ex-muscle">Hamstrings, Po, Rücken</div><div class="ex-tip">Rücken gerade, Dehnung der Hamstrings spüren</div></div>
+    <div class="ex-top"><div class="ex-name">Kabel Pull-Through <span class="new-tag">NEU</span></div><div class="ex-muscle">Hamstrings, Po, hintere Kette</div><div class="ex-tip">Hüfte nach hinten schieben, Rücken gerade – der Kabelzug führt die Bewegung</div></div>
     <div class="sets-row">
-      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="c_rdl_weight" type="text" inputmode="decimal" placeholder="–"></div>
+      <div class="set-col"><div class="set-header accent">Kg</div><input class="editable weight" data-id="c_pullthrough_weight" type="text" inputmode="decimal" placeholder="–"></div>
       <div class="set-col"><div class="set-header">Sätze</div><div style="font-family:'DM Mono',monospace;font-size:1.1rem;color:var(--accent);padding:7px 0;font-weight:600;">3</div></div>
-      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="c_rdl_reps" type="text" inputmode="text" placeholder="8–10"></div>
+      <div class="set-col"><div class="set-header">Wdh.</div><input class="editable reps" data-id="c_pullthrough_reps" type="text" inputmode="text" placeholder="10–12"></div>
     </div>
-    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">2 Min</span></div>
+    <div class="rest-row"><span class="rest-label">Pause</span><span class="rest-val">90 Sek</span></div>
   </div>
   <div class="ex-card">
     <div class="ex-top"><div class="ex-name">Adduktoren</div><div class="ex-muscle">Innerer Oberschenkel</div></div>
@@ -814,6 +833,63 @@ function loadAll() {
     status.textContent = 'Gewichte geladen ✓';
     status.className = 'save-status saved';
   } catch(e) {}
+}
+
+function exportData() {
+  const data = {};
+  document.querySelectorAll('[data-id]').forEach(el => {
+    if (el.value.trim()) data[el.dataset.id] = el.value.trim();
+  });
+  if (Object.keys(data).length === 0) {
+    showToast('Keine Gewichte eingetragen');
+    return;
+  }
+  const payload = {
+    plan: 'trainingsplan',
+    exportiert: new Date().toISOString(),
+    gewichte: data
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const datum = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = 'trainingsplan-gewichte-' + datum + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('⬇ Exportiert');
+}
+
+function importData(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      const data = parsed.gewichte || parsed; // akzeptiert auch rohes Format
+      if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+        throw new Error('Ungültiges Format');
+      }
+      let count = 0;
+      Object.entries(data).forEach(([id, val]) => {
+        const el = document.querySelector('[data-id="' + id + '"]');
+        if (el && typeof val === 'string') { el.value = val; count++; }
+      });
+      if (count === 0) {
+        showToast('Keine passenden Werte gefunden');
+        return;
+      }
+      saveAll();
+      showToast('⬆ ' + count + ' Werte importiert');
+    } catch (err) {
+      showToast('Import fehlgeschlagen – keine gültige Datei');
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
 }
 
 function showToast(msg) {
